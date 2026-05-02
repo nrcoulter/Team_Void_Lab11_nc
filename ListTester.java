@@ -304,13 +304,14 @@ public class ListTester {
 
 
 		//Iterator concurrency tests
-		// test_IterConcurrency();
-		// if (SUPPORTS_LIST_ITERATOR) {
-		// 	test_ListIterConcurrency();
-		// }
+		test_IterConcurrency();
+		if (SUPPORTS_LIST_ITERATOR) {
+			test_ListIterConcurrency();
+		}
 
 		// report final verdict
 		printFinalSummary();
+		System.out.println(SUPPORTS_LIST_ITERATOR);
 	}
 
 	//////////////////////////////////////
@@ -926,6 +927,7 @@ public class ListTester {
 
 			// ListIterator
 			if (SUPPORTS_LIST_ITERATOR) {
+				System.out.println("HERE!!!!????\n\n\n");
 				printTest(scenarioName + "_testListIter", testListIter(scenario.build(), Result.NoException));
 				printTest(scenarioName + "_testListIterNextIndex", testListIterNextIndex(WrapIt.prep(scenario.build(), true).getListIterator(), 0, Result.MatchingValue));
 				printTest(scenarioName + "_testListIterPreviousIndex", testListIterPreviousIndex(WrapIt.prep(scenario.build(), true).getListIterator(), -1, Result.MatchingValue));
