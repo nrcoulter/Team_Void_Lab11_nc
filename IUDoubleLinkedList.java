@@ -71,14 +71,16 @@ public class IUDoubleLinkedList<E> implements IndexedUnsortedList<E> {
 
     @Override
     public E removeFirst() {
-        if (isEmpty()) throw new NoSuchElementException();
-		return remove(front.getElement());
+        if (isEmpty())
+            throw new NoSuchElementException();
+        return removeElement(front);
 	}
 
     @Override
     public E removeLast() {
-        if (isEmpty()) throw new NoSuchElementException();
-		return remove(rear.getElement());
+        if (isEmpty())
+            throw new NoSuchElementException();
+        return removeElement(rear);
     }
 
     @Override
@@ -132,6 +134,10 @@ public class IUDoubleLinkedList<E> implements IndexedUnsortedList<E> {
 
 		count--;
 		modCount++;
+
+        // Set to null to avoid memory leak
+        current.setNext(null);
+        current.setPrevious(null);
 
 		return result;
 	}
@@ -361,9 +367,19 @@ public class IUDoubleLinkedList<E> implements IndexedUnsortedList<E> {
             switch (state) {
                 case NEXT:
                     removeElement(current);
+                    current = previous;
+                    currentIndex--;
                     break;
                 case PREVIOUS:
                     removeElement(next);
+                    // After removving, the node that was after next is now the new next
+                    if (current == null) {
+                        // removed the first element, next is the new front
+                        next = front;
+                    } else {
+                        // next is whatever follows the current position
+                        next = current.getNext();
+                    }
                     break;
                 default:
                     throw new IllegalStateException();
@@ -394,7 +410,28 @@ public class IUDoubleLinkedList<E> implements IndexedUnsortedList<E> {
         public void add(E e) {
             if (iterModCount != modCount) throw new ConcurrentModificationException();
             IUDoubleLinkedList.this.add(currentIndex, e); 
+
+            // Update the iterator's 'previous' pointer to point to the new node
+            if (next == null) {
+                // Cursor is at the end of the list, the new node is the rear
+                current = rear;
+                // Decide what the previous pointer should be based on current position
+                if (current != null) {
+                    // If the current node exists, then previous is the node behind
+                    previous = current.getPrevious();
+                } else {
+                    // If current is null (front of the list), previous must be null
+                    previous = null;
+                }
+            } else {
+                // Cursor is in the middle, the new node is behind next
+                current = next.getPrevious();
+                previous = current.getPrevious();
+            }
+
+            currentIndex++;
             iterModCount++;
+            state = CursorState.NEITHER;
         }
 
         private void moveToCorrectLoc(int index) {
