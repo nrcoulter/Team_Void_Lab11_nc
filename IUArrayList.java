@@ -269,67 +269,67 @@ public class IUArrayList<E> implements IndexedUnsortedList<E> {
 	// IGNORE THE FOLLOWING COMMENTED OUT CODE UNTIL LAB 10
 	// DON'T DELETE ME, HOWEVER!!!
 	public Iterator<E> iterator() {
-		// return new IUArrayListIterator(); // UNCOMMENT ME IN LAB 10
+		return new IUArrayListIterator(); // UNCOMMENT ME IN LAB 10
 		return null; // REMOVE ME IN LAB 10
 	}
 
 	// UNCOMMENT THE CODE BELOW IN LAB 10
 
-	// private class IUArrayListIterator implements Iterator<E> {
+	private class IUArrayListIterator implements Iterator<E> {
 
-	// private int iterModCount, current;
-	// private boolean canRemove;
+	private int iterModCount, current;
+	private boolean canRemove;
 
-	// public IUArrayListIterator() {
-	// iterModCount = modCount;
-	// current = 0;
-	// canRemove = false;
-	// }
+	public IUArrayListIterator() {
+	iterModCount = modCount;
+	current = 0;
+	canRemove = false;
+	}
 
-	// @Override
-	// public boolean hasNext() {
-	// if (iterModCount != modCount) {
-	// throw new ConcurrentModificationException();
-	// }
-	// return current < rear;
-	// }
+	@Override
+	public boolean hasNext() {
+	if (iterModCount != modCount) {
+	throw new ConcurrentModificationException();
+	}
+	return current < rear;
+	}
 
-	// @Override
-	// public E next() {
-	// if (!hasNext()) {
-	// throw new NoSuchElementException();
-	// }
-	// E item = array[current];
-	// current++;
-	// canRemove = true;
-	// return item;
-	// }
+	@Override
+	public E next() {
+	if (!hasNext()) {
+	throw new NoSuchElementException();
+	}
+	E item = array[current];
+	current++;
+	canRemove = true;
+	return item;
+	}
 
-	// @Override
-	// public void remove() {
-	// if (iterModCount != modCount) {
-	// throw new ConcurrentModificationException();
-	// }
-	// if (!canRemove) {
-	// throw new IllegalStateException();
-	// }
-	// // remove the element in the array at index current-1
-	// // presumably decrement the rear
-	// // presumably the modCount is getting incremented
-	// // all indices have to back up by one
-	// current--;
-	// rear--;
-	// // shift elements to the left
-	// for (int i = current; i < rear; i++) {
-	// array[i] = array[i + 1];
-	// }
-	// array[rear] = null;
-	// modCount++;
-	// iterModCount++;
-	// // Can only remove the LAST "seen" element
-	// // set back to a non-removal state
-	// canRemove = false;
-	// }
+	@Override
+	public void remove() {
+	if (iterModCount != modCount) {
+	throw new ConcurrentModificationException();
+	}
+	if (!canRemove) {
+	throw new IllegalStateException();
+	}
+	// remove the element in the array at index current-1
+	// presumably decrement the rear
+	// presumably the modCount is getting incremented
+	// all indices have to back up by one
+	current--;
+	rear--;
+	// shift elements to the left
+	for (int i = current; i < rear; i++) {
+	array[i] = array[i + 1];
+	}
+	array[rear] = null;
+	modCount++;
+	iterModCount++;
+	// Can only remove the LAST "seen" element
+	// set back to a non-removal state
+	canRemove = false;
+	}
 
 	// }
 
