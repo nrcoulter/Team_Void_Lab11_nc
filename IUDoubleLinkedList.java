@@ -238,20 +238,36 @@ public class IUDoubleLinkedList<E> implements IndexedUnsortedList<E> {
 
         @Override
         public boolean hasNext() {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Unimplemented method 'hasNext'");
+            if (iterModCount != modCount) throw new ConcurrentModificationException();
+            return index < size();
         }
 
         @Override
         public E next() {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Unimplemented method 'next'");
+            if (!hasNext()) throw new NoSuchElementException();
+            E item = next.getElement();
+
+			previous = current;
+			current = next;
+			next = next.getNext();
+
+			index++;
+			canRemove = true;
+			
+            return item;
         }
 
         @Override
         public void remove() {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Unimplemented method 'remove'");
+            if (iterModCount != modCount) throw new ConcurrentModificationException();
+            if (!canRemove) throw new IllegalStateException();
+
+			removeElement(current);
+
+			current = previous;
+			index--;
+			iterModCount++;
+            canRemove = false;
         }
     }
 
@@ -272,8 +288,8 @@ public class IUDoubleLinkedList<E> implements IndexedUnsortedList<E> {
 		private int iterModCount, currentIndex;
 		private CursorState state;
 		
-		/** Creates a new iterator for the list */
 		public DLLListIterator(int startingIndex) {
+            if (startingIndex > size() || startingIndex < 0) throw new IndexOutOfBoundsException();
 			previous = null;
 			current = null;
 			next = front;
@@ -281,64 +297,109 @@ public class IUDoubleLinkedList<E> implements IndexedUnsortedList<E> {
 			iterModCount = modCount;
 			currentIndex = startingIndex;
 			state = CursorState.NEITHER;
+
+            if (startingIndex > 0) moveToCorrectLoc(startingIndex);
 		}
 
         @Override
         public boolean hasNext() {
             if (iterModCount != modCount) throw new ConcurrentModificationException();
-            return currentIndex < size() + 1;
+            return currentIndex < size();
         }
 
         @Override
         public E next() {
-            E result = get(currentIndex);
+            if (!hasNext()) throw new NoSuchElementException();
+            E result = next.getElement();
 
-            state = CursorState.NEXT;
+            previous = current;
+			current = next;
+			next = next.getNext();
+
             currentIndex++;
+            state = CursorState.NEXT;
 
             return result;
         }
 
         @Override
         public boolean hasPrevious() {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Unimplemented method 'hasPrevious'");
+            if (iterModCount != modCount) throw new ConcurrentModificationException();
+            return currentIndex > 0;
         }
 
         @Override
         public E previous() {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Unimplemented method 'previous'");
+            if (!hasPrevious()) throw new NoSuchElementException();
+            E result = current.getElement();
+
+            next = current;
+            current = previous;
+            previous = previous != null ? previous.getPrevious() : null;
+
+            currentIndex--;
+            state = CursorState.PREVIOUS;
+
+            return result;
         }
 
         @Override
         public int nextIndex() {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Unimplemented method 'nextIndex'");
+            return currentIndex;
         }
 
         @Override
         public int previousIndex() {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Unimplemented method 'previousIndex'");
+            return currentIndex - 1;
         }
 
         @Override
         public void remove() {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Unimplemented method 'remove'");
+            if (iterModCount != modCount) throw new ConcurrentModificationException();
+            switch (state) {
+                case NEXT:
+                    removeElement(current);
+                    break;
+                case PREVIOUS:
+                    removeElement(next);
+                    break;
+                default:
+                    throw new IllegalStateException();
+            }
+
+            iterModCount++;
+            state = CursorState.NEITHER;
         }
 
         @Override
         public void set(E e) {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Unimplemented method 'set'");
+            switch (state) {
+                case NEXT:
+                    current.setElement(e);
+                    break;
+                case PREVIOUS:
+                    next.setElement(e);
+                    break;
+                default:
+                    throw new IllegalStateException();
+            }
+
+            state = CursorState.NEITHER;
         }
 
         @Override
         public void add(E e) {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Unimplemented method 'add'");
+            if (iterModCount != modCount) throw new ConcurrentModificationException();
+            IUDoubleLinkedList.this.add(currentIndex, e); 
+            iterModCount++;
+        }
+
+        private void moveToCorrectLoc(int index) {
+            for (int i = 0; i < index; i++) {
+                previous = current;
+                current = next;
+                next = next.getNext();
+		    }
         }
         
     }
