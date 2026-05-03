@@ -352,11 +352,13 @@ public class IUDoubleLinkedList<E> implements IndexedUnsortedList<E> {
 
         @Override
         public int nextIndex() {
+            if (iterModCount != modCount) throw new ConcurrentModificationException();
             return currentIndex;
         }
 
         @Override
         public int previousIndex() {
+            if (iterModCount != modCount) throw new ConcurrentModificationException();
             return currentIndex - 1;
         }
 
@@ -391,6 +393,7 @@ public class IUDoubleLinkedList<E> implements IndexedUnsortedList<E> {
 
         @Override
         public void set(E e) {
+            if (iterModCount != modCount) throw new ConcurrentModificationException();
             switch (state) {
                 case NEXT:
                     current.setElement(e);
@@ -402,6 +405,10 @@ public class IUDoubleLinkedList<E> implements IndexedUnsortedList<E> {
                     throw new IllegalStateException();
             }
 
+            // should use IUDoubleLinkedList.this.set(__, __) 
+            // but don't couldn't figure it out so I just did this
+            // VVV
+            IUDoubleLinkedList.this.modCount++;
             state = CursorState.NEITHER;
         }
 
