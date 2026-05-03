@@ -311,7 +311,6 @@ public class ListTester {
 
 		// report final verdict
 		printFinalSummary();
-		System.out.println(SUPPORTS_LIST_ITERATOR);
 	}
 
 	//////////////////////////////////////
